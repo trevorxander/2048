@@ -1,4 +1,5 @@
 from random import randint
+import copy
 import random
 
 
@@ -13,8 +14,34 @@ class Game2048:
         self._random_inserts = [2, 4]
         self._newly_merged = set()
         self._empty_spots = set()
+        self._prev_matrix: list
+        self._prev_empty_spots: set
+
+        self._movement_args = [{'left': 1},
+                               {'right': 1},
+                               {'up': 1},
+                               {'down': 1}]
 
         self.restart_game()
+
+    def undo(self):
+        self._revert_to(self._prev_matrix, self._prev_empty_spots)
+
+
+    def left(self):
+        self._agent_movement(left=1)
+
+    def right(self):
+        self._agent_movement(right=1)
+
+    def up(self):
+        self._agent_movement(up=1)
+
+    def down(self):
+        self._agent_movement(down=1)
+
+    def get_matrix(self):
+        return self._game_matrix
 
     def restart_game(self):
         self._game_matrix = [[0 for row in self._game_matrix] for col in self._game_matrix]
@@ -23,22 +50,26 @@ class Game2048:
                 row_col = (row, col)
                 self._empty_spots.add(row_col)
         self._rand_pop_in()
+        self._prev_matrix = self._game_matrix
+        self._prev_empty_spots = self._empty_spots
 
     def _print(self):
         for row in self._game_matrix:
             print(row)
         print('\n')
 
-
-    def _set_new_tile(self, row, col, value):
-        if (row, col) in self._empty_spots:
-            self._empty_spots.remove((row, col))
-        self._game_matrix[row][col] = value
-        if value == 0:
-            self._empty_spots.add ((row,col))
-
+    def _revert_to(self, prev_state, prev_empty_spots):
+        self._game_matrix = copy.deepcopy(prev_state)
+        self._empty_spots = copy.deepcopy(prev_empty_spots)
 
     def _move_tile(self, tile: tuple, left=0, up=0):
+
+        def _set_new_tile(row, col, value):
+            if (row, col) in self._empty_spots:
+                self._empty_spots.remove((row, col))
+            self._game_matrix[row][col] = value
+            if value == 0:
+                self._empty_spots.add((row, col))
         new_tile_row = tile[0]
         new_tile_col = tile[1]
         tile_value = self._game_matrix[new_tile_row][new_tile_col]
@@ -47,39 +78,61 @@ class Game2048:
             new_tile_row = new_tile_row - up
             new_tile_col = new_tile_col - left
 
-            #
-            if new_tile_row not in range(0, self._matrix_size) or \
-                    new_tile_col not in range(0, self._matrix_size):
-                self._set_new_tile(new_tile_row + up, new_tile_col + left, tile_value)
+            #if tile reaches end of matrix
+            if new_tile_row not in range(self._matrix_size) or \
+                    new_tile_col not in range(self._matrix_size):
+                _set_new_tile(new_tile_row + up, new_tile_col + left, tile_value)
                 break
+            #if tile moves through an empty spot
             if self._game_matrix[new_tile_row][new_tile_col] == 0:
-                self._set_new_tile(tile[0], tile[1], 0)
+                _set_new_tile(tile[0], tile[1], 0)
                 continue
+            #If the tile comes in contact with a tile of same value
             elif tile_value == self._game_matrix[new_tile_row][new_tile_col]:
+                #If tile was not already merged this turn
                 if (new_tile_row,new_tile_col) not in self._newly_merged:
                     self._game_matrix[new_tile_row][new_tile_col] *= 2
                     self._newly_merged.add((new_tile_row,new_tile_col))
-                    self._set_new_tile(tile[0], tile[1], 0)
+                    _set_new_tile(tile[0], tile[1], 0)
+                #If tile was merged this turn
                 else:
-                    self._set_new_tile(new_tile_row + up, new_tile_col + left, tile_value)
+                    _set_new_tile(new_tile_row + up, new_tile_col + left, tile_value)
                 return
             else:
-                self._set_new_tile(new_tile_row + up, new_tile_col + left, tile_value)
+                _set_new_tile(new_tile_row + up, new_tile_col + left, tile_value)
                 return
 
+    def _agent_movement(self, **direction_arg):
+        self._prev_matrix = copy.deepcopy(self._game_matrix)
+        self._prev_empty_spots = copy.deepcopy(self._empty_spots)
 
-    def _movement(self, left = 0, right = 0, up = 0, down = 0):
-        if left:
-            self._horizontal(left=1)
-        if right:
-            self._horizontal(right=1)
-        if up:
-            self._vertical(up=1)
-        if down:
-            self._vertical(down=1)
+        self._movement(**direction_arg)
 
+        if self._is_game_over():
+            print('GAME OVER!')
+
+    def _movement(self, **direction_arg):
+        direction = list(direction_arg.keys())[0]
+        if direction == 'left' or direction == 'right':
+            self._horizontal(**direction_arg)
+        else:
+            self._vertical(**direction_arg)
         self._newly_merged.clear()
         self._rand_pop_in()
+
+    def _is_game_over(self):
+        if len(self._empty_spots) > 0:
+            return True
+        current_game = copy.deepcopy(self._game_matrix)
+        current_empty_spots = copy.deepcopy(self._empty_spots)
+
+        is_change = False
+        for args in self._movement_args:
+            self._movement(**args)
+            if current_game != self._game_matrix:
+                is_change = True
+            self._revert_to(current_game, current_empty_spots)
+        return not is_change
 
 
     def _horizontal(self, left=0, right=0):
@@ -104,24 +157,10 @@ class Game2048:
                 if self._game_matrix[row][col] != 0:
                     self._move_tile((row, col), up=up + down)
 
-    def left(self):
-        self._movement(left=1)
 
-    def right(self):
-        self._movement(right=1)
-
-    def up(self):
-        self._movement(up=1)
-
-    def down(self):
-        self._movement(down=1)
-
-    def get_matrix(self):
-        return self._game_matrix
 
     def _rand_pop_in(self):
         max_random_inserts = randint(1, int(self._matrix_size / 2))
-        print('')
         for rands in range(0,max_random_inserts):
             if len(self._empty_spots) == 0:
                 return
