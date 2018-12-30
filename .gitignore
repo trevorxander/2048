@@ -4,3 +4,7 @@
 venv/
 
 game/__pycache__/
+
+\.DS_Store
+
+game2048/__pycache__/
