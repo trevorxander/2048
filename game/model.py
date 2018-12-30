@@ -1,6 +1,5 @@
 from random import randint
 import copy
-import random
 
 
 class Game2048:
@@ -14,8 +13,8 @@ class Game2048:
         self._random_inserts = [2, 4]
         self._newly_merged = set()
         self._empty_spots = set()
-        self._prev_matrix: list
-        self._prev_empty_spots: set
+        self._prev_matrix = list()
+        self._prev_empty_spots = set()
         self._game_over = False
         self._score = 0
 
@@ -79,6 +78,7 @@ class Game2048:
             self._game_matrix[row][col] = value
             if value == 0:
                 self._empty_spots.add((row, col))
+
         new_tile_row = tile[0]
         new_tile_col = tile[1]
         tile_value = self._game_matrix[new_tile_row][new_tile_col]
@@ -87,24 +87,24 @@ class Game2048:
             new_tile_row = new_tile_row - up
             new_tile_col = new_tile_col - left
 
-            #if tile reaches end of matrix
+            # if tile reaches end of matrix
             if new_tile_row not in range(self._matrix_size) or \
                     new_tile_col not in range(self._matrix_size):
                 _set_new_tile(new_tile_row + up, new_tile_col + left, tile_value)
                 break
-            #if tile moves through an empty spot
+            # if tile moves through an empty spot
             if self._game_matrix[new_tile_row][new_tile_col] == 0:
                 _set_new_tile(tile[0], tile[1], 0)
                 continue
-            #If the tile comes in contact with a tile of same value
+            # If the tile comes in contact with a tile of same value
             elif tile_value == self._game_matrix[new_tile_row][new_tile_col]:
-                #If tile was not already merged this turn
-                if (new_tile_row,new_tile_col) not in self._newly_merged:
+                # If tile was not already merged this turn
+                if (new_tile_row, new_tile_col) not in self._newly_merged:
                     self._game_matrix[new_tile_row][new_tile_col] *= 2
                     self._score += self._game_matrix[new_tile_row][new_tile_col]
-                    self._newly_merged.add((new_tile_row,new_tile_col))
+                    self._newly_merged.add((new_tile_row, new_tile_col))
                     _set_new_tile(tile[0], tile[1], 0)
-                #If tile was merged this turn
+                # If tile was merged this turn
                 else:
                     _set_new_tile(new_tile_row + up, new_tile_col + left, tile_value)
                 return
@@ -131,7 +131,6 @@ class Game2048:
         if self._prev_matrix != self._game_matrix:
             self._rand_pop_in()
 
-
     def _is_game_over(self):
         if len(self._empty_spots) > 0:
             return False
@@ -147,7 +146,6 @@ class Game2048:
 
         self._game_over = not is_change
         return not is_change
-
 
     def _horizontal(self, left=0, right=0):
         right = -right
@@ -173,7 +171,7 @@ class Game2048:
 
     def _rand_pop_in(self):
         max_random_inserts = randint(1, int(self._matrix_size / 2))
-        for rands in range(0,max_random_inserts):
+        for rands in range(0, max_random_inserts):
             if len(self._empty_spots) == 0:
                 return
             empty_spot = self._rand_empty_spot()
@@ -188,5 +186,5 @@ class Game2048:
         for num in self._random_inserts:
             if num == self._random_inserts[- 1]:
                 return num
-            if randint(0,100) <= self._random_inserts_percent:
+            if randint(0, 100) <= self._random_inserts_percent:
                 return num
