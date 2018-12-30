@@ -10,6 +10,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         MainWindow.game._print()
+        self._prev_score = 0
 
 
     def keyPressEvent(self, event):
@@ -23,9 +24,9 @@ class MainWindow(QtWidgets.QMainWindow):
         if event.key() == QtCore.Qt.Key_Down:
             MainWindow.game.down()
         if event.key() == QtCore.Qt.Key_Space:
-            MainWindow.game._rand_pop_in()
+            MainWindow.game.undo()
+        print(MainWindow.game.score)
         MainWindow.game._print()
-
 
 
 
