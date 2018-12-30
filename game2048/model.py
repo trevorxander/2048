@@ -2,7 +2,7 @@ from random import randint
 import copy
 
 
-class Game2048:
+class Model2048:
     DEFAULT_MATRIX_SIZE = 4
 
     def __init__(self, matrix_size=DEFAULT_MATRIX_SIZE):

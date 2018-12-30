@@ -1,11 +1,11 @@
-from game.model import Game2048
+from game2048 import Model2048
 from os import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    game = Game2048(4)
+    game = Model2048(4)
     testno = 0
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
@@ -25,7 +25,7 @@ class MainWindow(QtWidgets.QMainWindow):
             MainWindow.game.down()
         if event.key() == QtCore.Qt.Key_Space:
             MainWindow.game.undo()
-        print(MainWindow.game.score)
+        print('Score = {score}'.format(score = MainWindow.game.score))
         MainWindow.game._print()
 
 
