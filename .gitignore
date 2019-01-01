@@ -8,3 +8,11 @@ game/__pycache__/
 \.DS_Store
 
 game2048/__pycache__/
+
+game2048/gui/__pycache__/
+
+game2048/gui/play_screen/__pycache__/
+
+game2048/gui/elements/__pycache__/
+
+game2048/gui/play_screen/game/__pycache__/
