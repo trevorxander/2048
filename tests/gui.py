@@ -1,27 +1,35 @@
 from game2048 import gui
 from os import sys
 from PyQt5 import QtCore, QtWidgets, QtGui
-
+import time
 
 
 
 class MainWindow(QtWidgets.QMainWindow):
+    event_processing = False
     def __init__(self):
         QtWidgets.QWidget.__init__(self)
         self.game_area = gui.GameArea(parent=self)
         self.setCentralWidget(self.game_area)
+        self.input_buffer = []
+        self.resize(self.game_area.size())
+
 
     def keyPressEvent(self, event):
+        time_start = time.time()
+        self.input_buffer.append(event.key())
         if event.key() == QtCore.Qt.Key_Left:
             self.game_area.slide_left()
-        if event.key() == QtCore.Qt.Key_Right:
+        elif event.key() == QtCore.Qt.Key_Right:
             self.game_area.slide_right()
-        if event.key() == QtCore.Qt.Key_Up:
+        elif event.key() == QtCore.Qt.Key_Up:
             self.game_area.slide_up()
-        if event.key() == QtCore.Qt.Key_Down:
+        elif event.key() == QtCore.Qt.Key_Down:
             self.game_area.slide_down()
-        if event.key() == QtCore.Qt.Key_Space:
-            MainWindow.game.undo()
+        elif event.key() == QtCore.Qt.Key_Space:
+            self.game_area.undo_last_move()
+        time_end = time.time()
+        print(time_end - time_start)
 
 
 
