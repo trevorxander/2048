@@ -3,14 +3,21 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 class Label (QtWidgets.QWidget):
     def __init__(self, parent = None, Label='test', val = 0):
         QtWidgets.QWidget.__init__(self, parent = parent)
-        ui = uic.loadUi('../game2048/gui/elements/label.ui', self)
-        label = ui.label
-        label: QtWidgets.QLabel
+        self.ui = uic.loadUi('../game2048/gui/elements/label.ui', self)
 
-        label = ui.value
-        label: QtWidgets.QLabel
+        self._label = self.ui.label
+
+        self._value = self.ui.value
 
         self.show()
+
+    def set_label(self, label):
+        self._label.setText(label)
+
+
+    def set_value(self, value):
+        self._value.setText(value)
+
 
 class Button (QtWidgets.QWidget):
     def __init__(self, parent = None, text=''):
@@ -20,6 +27,7 @@ class Button (QtWidgets.QWidget):
         self.show()
 
 class Tile (QtWidgets.QWidget):
+    GRID_SPACING = 10
     def __init__(self, parent = None, value=0, pos = (0,0)):
         self.parent = parent
         self._pos = pos
@@ -30,7 +38,8 @@ class Tile (QtWidgets.QWidget):
 
         self.format_text = '<html><head/><body><p align="center"><span style=" font-size:48pt;">{0}</span></p></body></html>'
         self.value = value
-        self._map_from_pos(150, 140)
+
+        self.remap()
         self.show()
 
 
@@ -42,9 +51,19 @@ class Tile (QtWidgets.QWidget):
 
     @value.setter
     def value(self, value):
+        self._value = value
         if value == 0:
             value = ''
         self._value_label.setText(self.format_text.format(value))
+
+    @property
+    def length(self):
+        return self.width()
+
+    @length.setter
+    def length(self, new_size):
+        self.resize(new_size, new_size)
+        self.remap()
 
     @property
     def location(self):
@@ -56,6 +75,7 @@ class Tile (QtWidgets.QWidget):
     def location(self, pos):
         self.move(pos[0],pos[1])
 
-    def _map_from_pos(self, horizontal, vertical):
-        self.location = (horizontal * self._pos[1],
-                        (vertical * self._pos[0]))
+    def remap(self):
+        spacing = self.width() - 24 + Tile.GRID_SPACING
+        self.location = (spacing * self._pos[1],
+                        (spacing * self._pos[0]))
