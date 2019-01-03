@@ -31,9 +31,6 @@ class Model2048:
     def undo(self):
         self._restore(self._last_game_state)
 
-
-
-
     def left(self):
         self._agent_movement(left=1)
 
@@ -147,11 +144,17 @@ class Model2048:
                 return
 
     def _agent_movement(self, **direction_arg):
+
         self._last_game_state = self._backup()
 
+        self._newly_merged.clear()
         self.moved_tiles.clear()
         self.pop_ins.clear()
+
         self._movement(**direction_arg)
+
+        if len(self.moved_tiles) != 0:
+            self._rand_pop_in()
 
         if self._is_game_over():
             print('GAME OVER!')
@@ -162,25 +165,24 @@ class Model2048:
             self._horizontal(**direction_arg)
         else:
             self._vertical(**direction_arg)
-        self._newly_merged.clear()
-        if self._last_game_state[0] != self._game_matrix:
-            self._rand_pop_in()
+
 
     def _is_game_over(self):
         if len(self._empty_spots) > 0:
             return False
 
-        backup = self._backup()
-        current_game = backup[0]
-        is_change = False
-        for args in self._movement_args:
-            self._movement(**args)
-            if current_game != self._game_matrix:
-                is_change = True
-            self._restore(backup)
-
-        self._game_over = not is_change
-        return not is_change
+        for row in range(len(self._game_matrix)):
+             for col in range(len(self._game_matrix)):
+                adjacents = [(row , col - 1),
+                             (row, col + 1),
+                             (row - 1, col),
+                             (row + 1, col)]
+                for adjacent in adjacents:
+                    if adjacent[0] in range(len(self._game_matrix)) and\
+                            adjacent[1] in range(len(self._game_matrix)):
+                        if self._game_matrix[adjacent[0]][adjacent[1]] == self._game_matrix[row][col]:
+                            return False
+        return True
 
     def _horizontal(self, left=0, right=0):
         right = -right
@@ -205,8 +207,8 @@ class Model2048:
                     self._move_tile((row, col), up=up + down)
 
     def _rand_pop_in(self):
-        max_random_inserts = randint(1, int(self._matrix_size / 2))
-        for rands in range(0, max_random_inserts):
+        no_of_random_inserts = randint(1, int(self._matrix_size / 2))
+        for rands in range(0, no_of_random_inserts):
             if len(self._empty_spots) == 0:
                 return
             empty_spot = self._rand_empty_spot()
@@ -216,6 +218,9 @@ class Model2048:
             continue
 
     def _rand_empty_spot(self):
+        no_of_picks = randint(1,len(self._empty_spots))
+        for picks in range (no_of_picks):
+            self._empty_spots.add(self._empty_spots.pop())
         return self._empty_spots.pop()
 
     def _pick_random_insert(self):
