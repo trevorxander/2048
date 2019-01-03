@@ -2,10 +2,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from game2048 import gui
 
 class GameGrid (QtWidgets.QWidget):
-    ANIMATION_DURATION = 100
+    ANIMATION_DURATION = 80
     def __init__(self, parent = None, matrix = None):
         QtWidgets.QWidget.__init__(self, parent = parent)
-        ui = uic.loadUi('../game2048/gui/play_screen/game/game_grid.ui', self)
+        ui = uic.loadUi('game2048/gui/play_screen/game/game_grid.ui', self)
         self.game_matrix = matrix
         self.grid = ui.grid_frame
         self.tile_length = 150
@@ -18,9 +18,13 @@ class GameGrid (QtWidgets.QWidget):
 
         self.corner_tile = self.gui_matrix[self.grid_size - 1][self.grid_size - 1]
         self.frame_thickness = 10
-        self.setMinimumWidth(494)
-        self.setMinimumHeight(494)
+
         self.animations = QtCore.QParallelAnimationGroup()
+
+        self.default_style = 'QFrame {{background-color: {color};' \
+                             'border: 1px solid {color};' \
+                             'border-radius: 10px;}}'
+        self.setStyleSheet(self.default_style.format(color='rgb(185,173,162	)'))
 
 
         self.show()
@@ -71,6 +75,7 @@ class GameGrid (QtWidgets.QWidget):
         self.animations.addAnimation(move_and_merge)
 
         self.tile_to_delete.append(moving_tile)
+        pass
 
     def animate_random(self, pos, value):
         empty_tile = self.gui_matrix[pos[0]][pos[1]]
@@ -86,8 +91,6 @@ class GameGrid (QtWidgets.QWidget):
 
         init_size.setWidth(int(1))
         init_size.setHeight(int(1))
-
-
 
         pop_in.setStartValue(init_size)
         pop_in.setEndValue(final_size)
@@ -135,5 +138,3 @@ class GameGrid (QtWidgets.QWidget):
         for row in self.gui_matrix:
             for tile in row:
                 tile.length = self.tile_length
-
-
