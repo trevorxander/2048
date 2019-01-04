@@ -1,11 +1,15 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 import game2048
 from game2048 import gui
-
+import time
+import queue
 class GameArea (QtWidgets.QWidget):
     MARGIN = 25
-    def __init__(self, parent = None, label='2048', game_size=4, has_undo = True):
+    # zero for infinite buffer size
+    INPUT_BUFFER_SIZE = 5
+    def __init__(self, parent = None, label='2048', game_size=8, has_undo = True):
         QtWidgets.QWidget.__init__(self, parent = parent)
+        self.parent = parent
 
         main_label_color = 'rgb(118,110,102)'
         main_label_font_size = 50
@@ -41,6 +45,7 @@ class GameArea (QtWidgets.QWidget):
 
         self.game_grid = gui.GameGrid(matrix=self.game_model.get_matrix())
         self.game_grid.animations.finished.connect(self.animation_complete)
+
         game_box.addWidget(self.game_grid)
 
         pallete = QtGui.QPalette()
@@ -48,14 +53,19 @@ class GameArea (QtWidgets.QWidget):
         self.setAutoFillBackground(True)
         self.setPalette(pallete)
 
-        self.resize(421 + 24,605)
+        self.resize(421 + 24, 605)
+
+        self.event_queue = queue.Queue(maxsize=self.INPUT_BUFFER_SIZE)
+        self.keyboard_to_game_event = {QtCore.Qt.Key_Left: self.game_model.left,
+                                  QtCore.Qt.Key_Right: self.game_model.right,
+                                  QtCore.Qt.Key_Up: self.game_model.up,
+                                  QtCore.Qt.Key_Down: self.game_model.down,
+                                  QtCore.Qt.Key_Space: self.game_model.undo}
 
         self.show()
 
-
     def set_score(self, label, score):
         label.set_value(score)
-
 
     def slide_left(self):
         self.game_model.left()
@@ -89,8 +99,28 @@ class GameArea (QtWidgets.QWidget):
         for randoms in random_inserts:
             self.game_grid.animate_random(randoms[0],randoms[1])
 
+        self.installEventFilter(self)
         self.game_grid.animations.start()
 
+    def keyPressEvent(self, event):
+        self.event_queue.put(self.keyboard_to_game_event[event.key()])
+        self.process_queued_events()
+
+    def eventFilter(self, QObject, QEvent):
+        if (QEvent.type() == QtCore.QEvent.KeyPress):
+            if(QEvent.key() in self.keyboard_to_game_event):
+                if self.event_queue.full():
+                    return True
+                self.event_queue.put(self.keyboard_to_game_event[QEvent.key()])
+            return True
+        return False
+
+    def process_queued_events(self):
+        if self.event_queue.empty():
+            self.removeEventFilter(self)
+        else:
+            self.event_queue.get()()
+            self.update_game()
 
     def animation_complete(self):
         self.game_grid.clean_up()
@@ -99,4 +129,10 @@ class GameArea (QtWidgets.QWidget):
         self.set_score(self.score_label, self.score)
         if self.best_score < self.score:
             self.set_score(self.best_score_label, self.score)
+
+        self.process_queued_events()
+
+
+
+
 
