@@ -7,11 +7,12 @@ class Model2048:
     DEFAULT_MATRIX_SIZE = 4
 
     def __init__(self, matrix_size=DEFAULT_MATRIX_SIZE):
-        self._random_inserts_percent = 100
+        self._random_inserts_percent = 90
+        self._no_random_inserts_percent = 90
         self._matrix_size = matrix_size
         self._game_matrix = [[0] * self._matrix_size] * self._matrix_size
         self._no_random_inserts = self._matrix_size / 2
-        self._random_inserts = [2, 4]
+        self._random_inserts = [2, 4, 8, 16, 32, 64]
         self._newly_merged = set()
         self._empty_spots = set()
         self._game_over = False
@@ -51,8 +52,8 @@ class Model2048:
 
     def restart_game(self):
         self._game_matrix = [[0 for row in self._game_matrix] for col in self._game_matrix]
-        for row in range(0, self._matrix_size):
-            for col in range(0, self._matrix_size):
+        for row in range(self._matrix_size):
+            for col in range(self._matrix_size):
                 row_col = (row, col)
                 self._empty_spots.add(row_col)
 
@@ -156,9 +157,6 @@ class Model2048:
         if len(self.moved_tiles) != 0:
             self._rand_pop_in()
 
-        if self._is_game_over():
-            print('GAME OVER!')
-
     def _movement(self, **direction_arg):
         direction = list(direction_arg.keys())[0]
         if direction == 'left' or direction == 'right':
@@ -207,8 +205,15 @@ class Model2048:
                     self._move_tile((row, col), up=up + down)
 
     def _rand_pop_in(self):
-        no_of_random_inserts = randint(1, int(self._matrix_size / 2))
-        for rands in range(0, no_of_random_inserts):
+
+        max_random_inserts = int(self._matrix_size / 2)
+        for num in range(1,max_random_inserts + 1):
+            if randint(1,100) <= self._no_random_inserts_percent:
+                no_of_random_inserts = num
+                break
+
+        no_of_random_inserts = num
+        for rands in range(no_of_random_inserts):
             if len(self._empty_spots) == 0:
                 return
             empty_spot = self._rand_empty_spot()
@@ -227,5 +232,5 @@ class Model2048:
         for num in self._random_inserts:
             if num == self._random_inserts[- 1]:
                 return num
-            if randint(0, 100) <= self._random_inserts_percent:
+            if randint(0,100) <= self._random_inserts_percent:
                 return num
