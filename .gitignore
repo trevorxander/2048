@@ -18,3 +18,9 @@ game2048/gui/elements/__pycache__/
 game2048/gui/play_screen/game/__pycache__/
 
 tests/copy_test\.py
+
+*.pyc
+
+*.pyprof
+
+profile\.pyprof\.log
