@@ -12,7 +12,7 @@ class Model2048:
         self._matrix_size = matrix_size
         self._game_matrix = [[0] * self._matrix_size] * self._matrix_size
         self._no_random_inserts = self._matrix_size / 2
-        self._random_inserts = [2, 4, 8, 16, 32, 64]
+        self._random_inserts = [2, 4, 8]
         self._newly_merged = set()
         self._empty_spots = set()
         self._game_over = False
@@ -232,5 +232,5 @@ class Model2048:
         for num in self._random_inserts:
             if num == self._random_inserts[- 1]:
                 return num
-            if randint(0,100) <= self._random_inserts_percent:
+            if randint(1,100) <= self._random_inserts_percent:
                 return num
