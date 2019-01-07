@@ -12,7 +12,7 @@ class Model2048:
         self._matrix_size = matrix_size
         self._game_matrix = [[0] * self._matrix_size] * self._matrix_size
         self._no_random_inserts = self._matrix_size / 2
-        self._random_inserts = [2, 4, 8]
+        self._random_inserts = [2, 4]
         self._newly_merged = set()
         self._empty_spots = set()
         self._game_over = False
@@ -27,7 +27,6 @@ class Model2048:
 
         self._last_game_state = None
 
-        self.restart_game()
 
     def undo(self):
         self._restore(self._last_game_state)
@@ -58,12 +57,8 @@ class Model2048:
                 self._empty_spots.add(row_col)
 
         self._link_game_state()
+        self._score[0] = 0
         self._rand_pop_in()
-
-
-    @property
-    def game_over(self):
-        return self._game_over
 
     @property
     def score(self):
@@ -157,6 +152,7 @@ class Model2048:
         if len(self.moved_tiles) != 0:
             self._rand_pop_in()
 
+
     def _movement(self, **direction_arg):
         direction = list(direction_arg.keys())[0]
         if direction == 'left' or direction == 'right':
@@ -165,7 +161,7 @@ class Model2048:
             self._vertical(**direction_arg)
 
 
-    def _is_game_over(self):
+    def is_game_over(self):
         if len(self._empty_spots) > 0:
             return False
 

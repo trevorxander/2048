@@ -2,31 +2,30 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Label(QtWidgets.QWidget):
-    LABEL_COLOR = 'rgb(185,173,162)'
-    DEFAULT_STYLE = '* {{ background-color: {color};' \
+    _LABEL_COLOR = 'rgb(185,173,162)'
+    _DEFAULT_STYLE = '* {{ background-color: {color};' \
                     'border: 1px solid {color};' \
                     'border-radius: 10px;}}'
 
     def __init__(self, parent=None, label='Label', val=0):
         QtWidgets.QWidget.__init__(self, parent=parent)
 
-        self.ui = LabelUI()
-        self.ui.setupUi(self)
-        self._label = self.ui.label
-        self._value = self.ui.value
+        self._ui = LabelUI()
+        self._ui.setupUi(self)
+        self._label = self._ui.label
+        self._value = self._ui.value
 
-        self.setStyleSheet(self.DEFAULT_STYLE.format(color=self.LABEL_COLOR))
+        self.setStyleSheet(self._DEFAULT_STYLE.format(color=self._LABEL_COLOR))
         self.set_label(label)
         self.set_value(val)
         self.show()
 
     def set_label(self, label):
         self._label.setText(str(label))
-        pass
 
     def set_value(self, value):
         self._value.setText(str(value))
-        pass
+
 
 
 class LabelUI(object):

@@ -1,16 +1,19 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
-from game2048.gui.elements import Button, Tile, Label
+from game2048.gui.elements import Tile, Label
 
 class CompetitionArea(QtWidgets.QWidget):
     WINNING_STYLE =''
     LOSING_STYLE = ''
     DEFAULT_STYLE = ''
+
+    timer_end = QtCore.pyqtSignal()
     def __init__(self, parent=None, left_label='P1', right_label='P2'):
         QtWidgets.QWidget.__init__(self, parent=parent)
         self.ui = CompetitionAreaUI()
         self.ui.setupUi(self)
 
+        self.timer = self.ui.timer
         self._left_score = 0
         self._right_score = 0
 
@@ -20,7 +23,29 @@ class CompetitionArea(QtWidgets.QWidget):
 
         self.left.set_label(left_label)
         self.right.set_label(right_label)
+
+        self.timer_tick = QtCore.QTimer()
+        self.timer_tick.setInterval(1000)
+
+        self.timer_tick.timeout.connect(self.update_timer)
+
+        self.start_time = 60
+        self.current_time = self.start_time
+        self.start_timer()
         self.show()
+
+    def start_timer(self):
+        self.timer.set_value(self.current_time)
+        self.timer_tick.start()
+
+    def update_timer(self):
+        self.current_time -=1
+        self.timer.set_value(self.current_time)
+        if self.current_time == 0:
+            self.timer_tick.stop()
+            self.timer_end.emit()
+
+
 
     def update_left_score(self, score):
         self._left_score = score

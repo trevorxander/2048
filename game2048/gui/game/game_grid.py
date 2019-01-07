@@ -3,68 +3,68 @@ from game2048 import gui
 
 
 class GameGrid(QtWidgets.QWidget):
-    MARGIN_SIZE = 12
-    DEFAULT_ANIMATION_DURATION = 100
-    DEFAULT_STYLE = 'QFrame {{background-color: {color};' \
+    _MARGIN_SIZE = 12
+    _DEFAULT_ANIMATION_DURATION = 100
+    _DEFAULT_STYLE = 'QFrame {{background-color: {color};' \
                     'border: 1px solid {color};' \
                     'border-radius: 10px;}}'
-    GRID_COLOR = 'rgb(185,173,162)'
+    _GRID_COLOR = 'rgb(185,173,162)'
 
     def __init__(self, parent=None, matrix=None):
         QtWidgets.QWidget.__init__(self, parent=parent)
 
         ui = GameGridUI()
         ui.setupUi(self)
-        self.animation_duration = self.DEFAULT_ANIMATION_DURATION
+        self._animation_duration = self._DEFAULT_ANIMATION_DURATION
 
-        self.game_matrix = matrix
-        self.grid = ui.grid_frame
-        self.tile_length = 150
-        self.grid_size = len(matrix)
-        self.gui_matrix = []
-        self.tile_to_delete = []
-        self.initialize_grid()
+        self._game_matrix = matrix
+        self._grid = ui.grid_frame
+        self._tile_length = 150
+        self._grid_size = len(matrix)
+        self._gui_matrix = []
+        self._tile_to_delete = []
+        self._initialize_grid()
 
-        self.corner_tile = self.gui_matrix[self.grid_size - 1][self.grid_size - 1]
-        self.frame_thickness = 10
+        self._corner_tile = self._gui_matrix[self._grid_size - 1][self._grid_size - 1]
+        self._frame_thickness = 10
 
-        self.animations = QtCore.QParallelAnimationGroup()
+        self._animations = QtCore.QParallelAnimationGroup()
 
-        self.setStyleSheet(self.DEFAULT_STYLE.format(color=self.GRID_COLOR))
+        self.setStyleSheet(self._DEFAULT_STYLE.format(color=self._GRID_COLOR))
 
-        self.setMinimumWidth(103.75 * self.grid_size + self.MARGIN_SIZE * 2)
-        self.setMinimumHeight(104.75 * self.grid_size + self.MARGIN_SIZE * 2)
+        self.setMinimumWidth(103.75 * self._grid_size + self._MARGIN_SIZE * 2)
+        self.setMinimumHeight(104.75 * self._grid_size + self._MARGIN_SIZE * 2)
 
-        self.setMaximumWidth(103.75 * 1.5 * self.grid_size + self.MARGIN_SIZE * 2)
-        self.setMaximumHeight(100.75 * 1.5 * self.grid_size + self.MARGIN_SIZE * 2)
+        self.setMaximumWidth(150.75 * 1.5 * self._grid_size + self._MARGIN_SIZE * 2)
+        self.setMaximumHeight(100.75 * 1.5 * self._grid_size + self._MARGIN_SIZE * 2)
 
         self.resize(self.minimumWidth(), self.minimumHeight())
 
         self.show()
 
-    def initialize_grid(self):
-        for row in range(self.grid_size):
+    def _initialize_grid(self):
+        for row in range(self._grid_size):
             tile_row = []
-            for col in range(self.grid_size):
-                new_tile = gui.Tile(parent=self.grid, value=self.game_matrix[row][col], pos=(row, col))
-                new_tile.length = self.tile_length
+            for col in range(self._grid_size):
+                new_tile = gui.Tile(parent=self._grid, value=self._game_matrix[row][col], pos=(row, col))
+                new_tile.length = self._tile_length
                 tile_row.append(new_tile)
-            self.gui_matrix.append(tile_row)
+            self._gui_matrix.append(tile_row)
 
-    def update_grid(self, new_matrix):
+    def _update_grid(self, new_matrix):
         for row in range(len(new_matrix)):
             for col in range(len(new_matrix)):
-                if self.gui_matrix[row][col].value != new_matrix[row][col]:
-                    self.gui_matrix[row][col].value = new_matrix[row][col]
+                if self._gui_matrix[row][col].value != new_matrix[row][col]:
+                    self._gui_matrix[row][col].value = new_matrix[row][col]
 
     def get_tile(self, row, col):
-        return self.gui_matrix[row][col]
+        return self._gui_matrix[row][col]
 
-    def animate_tile(self, tile_current_pos, tile_final_pos, value):
-        source_tile = self.gui_matrix[tile_current_pos[0]][tile_current_pos[1]]
-        destination_tile = self.gui_matrix[tile_final_pos[0]][tile_final_pos[1]]
-        moving_tile = gui.Tile(parent=self.grid, pos=tile_current_pos, value=source_tile.value)
-        moving_tile.length = self.tile_length
+    def animate_tile(self, tile_current_pos, tile_final_pos):
+        source_tile = self._gui_matrix[tile_current_pos[0]][tile_current_pos[1]]
+        destination_tile = self._gui_matrix[tile_final_pos[0]][tile_final_pos[1]]
+        moving_tile = gui.Tile(parent=self._grid, pos=tile_current_pos, value=source_tile.value)
+        moving_tile.length = self._tile_length
 
         init_loc = source_tile.geometry()
         final_loc = destination_tile.geometry()
@@ -76,7 +76,7 @@ class GameGrid(QtWidgets.QWidget):
         source_tile.value = 0
 
         tile_movement = QtCore.QPropertyAnimation(moving_tile, b"geometry")
-        tile_movement.setDuration(self.animation_duration)
+        tile_movement.setDuration(self._animation_duration)
         tile_movement.setStartValue(init_loc)
         tile_movement.setEndValue(final_loc)
 
@@ -85,17 +85,17 @@ class GameGrid(QtWidgets.QWidget):
         if merge_animation is not None:
             move_and_merge.addAnimation(merge_animation)
 
-        self.animations.addAnimation(move_and_merge)
+        self._animations.addAnimation(move_and_merge)
 
-        self.tile_to_delete.append(moving_tile)
+        self._tile_to_delete.append(moving_tile)
         pass
 
     def animate_random(self, pos, value):
-        empty_tile = self.gui_matrix[pos[0]][pos[1]]
-        tile_to_animate = gui.Tile(parent=self.grid, pos=empty_tile._pos, value=value)
+        empty_tile = self._gui_matrix[pos[0]][pos[1]]
+        tile_to_animate = gui.Tile(parent=self._grid, pos=empty_tile._pos, value=value)
         tile_to_animate.setMinimumHeight(0)
         tile_to_animate.setMinimumWidth(0)
-        tile_to_animate.length = self.tile_length
+        tile_to_animate.length = self._tile_length
         tile_to_animate.raise_()
         pop_in = QtCore.QPropertyAnimation(tile_to_animate, b"geometry")
         init_size = tile_to_animate.geometry()
@@ -109,14 +109,14 @@ class GameGrid(QtWidgets.QWidget):
 
         pop_in.setStartValue(init_size)
         pop_in.setEndValue(final_size)
-        pop_in.setDuration(self.animation_duration)
+        pop_in.setDuration(self._animation_duration)
 
-        self.animations.addAnimation(pop_in)
-        self.tile_to_delete.append(tile_to_animate)
+        self._animations.addAnimation(pop_in)
+        self._tile_to_delete.append(tile_to_animate)
 
     def animate_tile_wobble(self, tile):
-        tile_to_animate = gui.Tile(parent=self.grid, pos=tile._pos, value=tile.value)
-        tile_to_animate.length = self.tile_length
+        tile_to_animate = gui.Tile(parent=self._grid, pos=tile._pos, value=tile.value)
+        tile_to_animate.length = self._tile_length
         tile_to_animate.raise_()
 
         size_increase = QtCore.QPropertyAnimation(tile_to_animate, b"geometry")
@@ -128,20 +128,20 @@ class GameGrid(QtWidgets.QWidget):
 
         size_increase.setStartValue(init_size)
         size_increase.setEndValue(increased_size)
-        size_increase.setDuration(self.animation_duration / 2)
+        size_increase.setDuration(self._animation_duration / 2)
 
         size_decrease.setStartValue(increased_size)
         size_decrease.setEndValue(init_size)
-        size_decrease.setDuration(self.animation_duration / 2)
+        size_decrease.setDuration(self._animation_duration / 2)
 
         wobble_animation = QtCore.QSequentialAnimationGroup()
         wobble_animation.addAnimation(size_increase)
         wobble_animation.addAnimation(size_decrease)
-        self.tile_to_delete.append(tile_to_animate)
+        self._tile_to_delete.append(tile_to_animate)
         return wobble_animation
 
     def clean_up(self):
-        for tile in self.tile_to_delete:
+        for tile in self._tile_to_delete:
             try:
                 tile.deleteLater()
                 tile = None
@@ -149,10 +149,10 @@ class GameGrid(QtWidgets.QWidget):
                 continue
 
     def resizeEvent(self, QResizeEvent):
-        self.tile_length = self.width() / self.grid_size + 5
-        for row in self.gui_matrix:
+        self._tile_length = self.width() / self._grid_size + 5
+        for row in self._gui_matrix:
             for tile in row:
-                tile.length = self.tile_length
+                tile.length = self._tile_length
         self.setMinimumHeight(self.width())
         self.setMaximumHeight(self.width())
 

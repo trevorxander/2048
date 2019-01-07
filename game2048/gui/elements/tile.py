@@ -2,8 +2,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Tile(QtWidgets.QWidget):
-    GRID_SPACING = 16
-    DEFAULT_STYLE = 'QLabel {{background-color: {color};' \
+    _GRID_SPACING = 16
+    _LABEL_STYLE = 'QLabel {{background-color: {color};' \
                     'color: {font_color};' \
                     'font-size: {font_size}px;' \
                     'border: 1px solid {color};' \
@@ -13,8 +13,8 @@ class Tile(QtWidgets.QWidget):
     def __init__(self, parent=None, value=0, pos=(0, 0)):
         QtWidgets.QWidget.__init__(self, parent=parent)
 
-        self.parent = parent
-        self._game_size = parent.parent().grid_size
+        self._parent = parent
+        self._game_size = parent.parent()._grid_size
         self._pos = pos
         self._value = value
         ui = TileUI()
@@ -67,7 +67,7 @@ class Tile(QtWidgets.QWidget):
                                   'font_size': 31}
 
         self.value = value
-        self.remap_to_grid()
+        self._remap_to_grid()
         self.show()
 
     @property
@@ -82,7 +82,7 @@ class Tile(QtWidgets.QWidget):
         value_style = value
         if value > self._max_tile_value:
             value_style = self._max_tile_value
-        self.setStyleSheet(self.DEFAULT_STYLE.format(**self._all_styles[value_style]))
+        self.setStyleSheet(self._LABEL_STYLE.format(**self._all_styles[value_style]))
         if value == 0:
             value = ''
         self._value_label.setText(str(value))
@@ -94,7 +94,7 @@ class Tile(QtWidgets.QWidget):
     @length.setter
     def length(self, new_size):
         self.resize(new_size, new_size)
-        self.remap_to_grid()
+        self._remap_to_grid()
 
     @property
     def location(self):
@@ -106,7 +106,7 @@ class Tile(QtWidgets.QWidget):
     def location(self, pos):
         self.move(pos[0], pos[1])
 
-    def remap_to_grid(self):
+    def _remap_to_grid(self):
         spacing = self.width() - 24 + 1.3 * self._game_size + 26 / 5
         self.location = (spacing * self._pos[1],
                          (spacing * self._pos[0]))
