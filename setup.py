@@ -8,5 +8,5 @@ setup(
     author='Trevor Xander',
     author_email='trevorcolexander@gmail.com',
     description='',
-    install_requires = ['PyQt5']
+    install_requires = ['PyQt5', 'anytree']
 )
