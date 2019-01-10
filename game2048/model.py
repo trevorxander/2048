@@ -27,6 +27,16 @@ class Model2048:
 
         self._last_game_state = None
 
+    def available_moves(self, matrix):
+        avaliable_moves = []
+
+        for movement_arg in self._movement_args:
+            for movement in movement_arg:
+                moved_matrix = copy.deepcopy(matrix)
+                self._movement(matrix=moved_matrix, **movement_arg)
+                if matrix != moved_matrix:
+                    avaliable_moves.append(movement_arg)
+        return avaliable_moves
 
     def undo(self):
         self._restore(self._last_game_state)
@@ -81,24 +91,20 @@ class Model2048:
         self._link_game_state()
         self._game_matrix = copy.deepcopy(backup_state[0])
         self._empty_spots = copy.deepcopy(backup_state[1])
-        self.moved_tiles= copy.deepcopy(backup_state[2])
-        self._score = copy.deepcopy(backup_state[3])
-        self.pop_ins = copy.deepcopy(backup_state[4])
+        self._score = copy.deepcopy(backup_state[2])
 
     def _link_game_state(self):
         self.game_state = [self._game_matrix,
                            self._empty_spots,
-                           self.moved_tiles,
-                           self._score,
-                           self.pop_ins]
+                           self._score]
 
-
-    def _move_tile(self, tile: tuple, left=0, up=0):
-
+    def _move_tile(self, tile: tuple, left=0, up=0, matrix=None):
+        if matrix == None:
+            matrix = self._game_matrix
         def _set_new_tile(row, col, value):
             if (row, col) in self._empty_spots:
                 self._empty_spots.remove((row, col))
-            self._game_matrix[row][col] = value
+            matrix[row][col] = value
             if value == 0:
                 self._empty_spots.add((row, col))
             else:
@@ -107,7 +113,7 @@ class Model2048:
 
         new_tile_row = tile[0]
         new_tile_col = tile[1]
-        tile_value = self._game_matrix[new_tile_row][new_tile_col]
+        tile_value = matrix[new_tile_row][new_tile_col]
 
         while True:
             new_tile_row = new_tile_row - up
@@ -119,16 +125,16 @@ class Model2048:
                 _set_new_tile(new_tile_row + up, new_tile_col + left, tile_value)
                 break
             # if tile moves through an empty spot
-            if self._game_matrix[new_tile_row][new_tile_col] == 0:
+            if matrix[new_tile_row][new_tile_col] == 0:
                 _set_new_tile(tile[0], tile[1], 0)
                 continue
             # If the tile comes in contact with a tile of same value
-            elif tile_value == self._game_matrix[new_tile_row][new_tile_col]:
+            elif tile_value == matrix[new_tile_row][new_tile_col]:
                 # If tile was not already merged this turn
                 if (new_tile_row, new_tile_col) not in self._newly_merged:
-                    #self._game_matrix[new_tile_row][new_tile_col] *= 2
-                    _set_new_tile(new_tile_row,new_tile_col, self._game_matrix[new_tile_row][new_tile_col] * 2)
-                    self._score[0] += self._game_matrix[new_tile_row][new_tile_col]
+                    #matrix[new_tile_row][new_tile_col] *= 2
+                    _set_new_tile(new_tile_row,new_tile_col, matrix[new_tile_row][new_tile_col] * 2)
+                    self._score[0] += matrix[new_tile_row][new_tile_col]
                     self._newly_merged.add((new_tile_row, new_tile_col))
                     _set_new_tile(tile[0], tile[1], 0)
                 # If tile was merged this turn
@@ -140,12 +146,7 @@ class Model2048:
                 return
 
     def _agent_movement(self, **direction_arg):
-
         self._last_game_state = self._backup()
-
-        self._newly_merged.clear()
-        self.moved_tiles.clear()
-        self.pop_ins.clear()
 
         self._movement(**direction_arg)
 
@@ -153,12 +154,17 @@ class Model2048:
             self._rand_pop_in()
 
 
-    def _movement(self, **direction_arg):
+    def _movement(self, matrix = None, **direction_arg):
+        self._newly_merged.clear()
+        self.moved_tiles.clear()
+        self.pop_ins.clear()
+        if matrix == None:
+            matrix = self._game_matrix
         direction = list(direction_arg.keys())[0]
         if direction == 'left' or direction == 'right':
-            self._horizontal(**direction_arg)
+            self._horizontal(matrix=matrix, **direction_arg)
         else:
-            self._vertical(**direction_arg)
+            self._vertical(matrix=matrix, **direction_arg)
 
 
     def is_game_over(self):
@@ -178,30 +184,33 @@ class Model2048:
                             return False
         return True
 
-    def _horizontal(self, left=0, right=0):
+    def _horizontal(self, matrix=None, left=0, right=0):
+        if matrix == None:
+            matrix = self._game_matrix
         right = -right
-        check_order = range(left, len(self._game_matrix) + right)
+        check_order = range(left, len(matrix) + right)
         if right == -1:
             check_order = reversed(check_order)
 
         for col in check_order:
-            for row in range(0, len(self._game_matrix)):
-                if self._game_matrix[row][col] != 0:
-                    self._move_tile((row, col), left=left + right)
+            for row in range(0, len(matrix)):
+                if matrix[row][col] != 0:
+                    self._move_tile((row, col), left=left + right, matrix=matrix)
 
-    def _vertical(self, up=0, down=0):
+    def _vertical(self, matrix=None, up=0, down=0):
+        if matrix == None:
+            matrix = self._game_matrix
         down = -down
-        check_order = range(up, len(self._game_matrix) + down)
+        check_order = range(up, len(matrix) + down)
         if down == -1:
             check_order = reversed(check_order)
 
         for row in check_order:
-            for col in range(0, len(self._game_matrix)):
-                if self._game_matrix[row][col] != 0:
-                    self._move_tile((row, col), up=up + down)
+            for col in range(0, len(matrix)):
+                if matrix[row][col] != 0:
+                    self._move_tile((row, col), up=up + down, matrix=matrix)
 
     def _rand_pop_in(self):
-
         max_random_inserts = int(self._matrix_size / 2)
         for num in range(1,max_random_inserts + 1):
             if randint(1,100) <= self._no_random_inserts_percent:
@@ -212,19 +221,19 @@ class Model2048:
         for rands in range(no_of_random_inserts):
             if len(self._empty_spots) == 0:
                 return
-            empty_spot = self._rand_empty_spot()
-            new_random_num = self._pick_random_insert()
+            empty_spot = self._pick_rand_empty_spot()
+            new_random_num = self._pick_num_to_insert()
             self._game_matrix[empty_spot[0]][empty_spot[1]] = new_random_num
             self.pop_ins.append((empty_spot,new_random_num))
             continue
 
-    def _rand_empty_spot(self):
+    def _pick_rand_empty_spot(self):
         no_of_picks = randint(1,len(self._empty_spots))
         for picks in range (no_of_picks):
             self._empty_spots.add(self._empty_spots.pop())
         return self._empty_spots.pop()
 
-    def _pick_random_insert(self):
+    def _pick_num_to_insert(self):
         for num in self._random_inserts:
             if num == self._random_inserts[- 1]:
                 return num
