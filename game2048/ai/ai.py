@@ -1,22 +1,22 @@
 import time
 from game2048.model import Model2048
-from random import randint
-from anytree import AnyNode, RenderTree
+from anytree import AnyNode
 from threading import Thread
 import copy
 import math
+
+
 class AI:
     def __init__(self, interface):
         self.interface = interface
-        self.all_move=['left',
-                       'right',
-                       'up',
-                       'down']
+        self.all_move = ['left',
+                         'right',
+                         'up',
+                         'down']
         self._movement_args = [{'left': 1},
                                {'right': 1},
                                {'up': 1},
                                {'down': 1}]
-
 
     def make_move(self):
         game_shell = self.interface.get_result()
@@ -29,7 +29,6 @@ class AI:
         next_move = self.get_next_move(self.matrix)
         self.interface.send_event(next_move)
         # print(time.time() - start)
-
 
     def get_next_move(self, matrix):
         root_node = self.create_node(matrix=matrix, parent=None)
@@ -59,10 +58,7 @@ class AI:
                 best_path = child
         return best_path
 
-
-
-
-    def create_game_tree(self, parent_node: AnyNode, max_depth = 1):
+    def create_game_tree(self, parent_node: AnyNode, max_depth=1):
         if parent_node.depth >= max_depth:
             return
         create_tree_threads = []
@@ -74,32 +70,29 @@ class AI:
         for movement_arg in available_moves:
             for movement in movement_arg:
                 moved_matrix = copy.deepcopy(matrix)
-                self.model._movement(matrix=moved_matrix,**movement_arg)
+                self.model._movement(matrix=moved_matrix, **movement_arg)
                 node = self.create_node(move=movement,
                                         matrix=moved_matrix,
                                         parent=parent_node)
                 tree_thread = Thread(target=self.create_game_tree, args=[node])
                 create_tree_threads.append(tree_thread)
 
-
         for threads in create_tree_threads:
             threads.start()
         for threads in create_tree_threads:
             threads.join()
 
-
         if parent_node.depth == 0:
             return parent_node
 
-
-    def create_node(self, parent = None, matrix=None, move='start'):
+    def create_node(self, parent=None, matrix=None, move='start'):
         if parent is None:
             parent_score = 0
         else:
             parent_score = parent.score
 
         node = AnyNode(parent=parent,
-                       move = move,
+                       move=move,
                        game=matrix,
                        score=self.calculate_score(matrix))
         return node
@@ -117,7 +110,7 @@ class AI:
                 if (tile and tile * 2 == cell) or (tile == 0 and cell == 2):
                     snakes.append(1 + find_snakes(row + 1, col, cell, matrix))
             if col > len(matrix) - 1:
-                cell = matrix[col - 1][ row]
+                cell = matrix[col - 1][row]
                 if (tile and tile * 2 == cell) or (tile == 0 and cell == 2):
                     snakes.append(1 + find_snakes(row, col - 1, cell, matrix))
             if col < len(matrix) - 1:
@@ -154,7 +147,7 @@ class AI:
             while next < len(matrix):
                 while next < len(matrix) - 1 and not matrix[next][x]:
                     next += 1
-                current_cell = matrix[current] [x]
+                current_cell = matrix[current][x]
                 current_value = math.log(current_cell, 2) if current_cell else 0
                 next_cell = matrix[next][x]
                 next_value = math.log(next_cell, 2) if next_cell else 0
@@ -180,12 +173,10 @@ class AI:
                     monotonic_right += (current_value - next_value)
                 current = next
                 next += 1
-                
+
         monotonic = max(monotonic_up, monotonic_down) + max(monotonic_left, monotonic_right)
 
-
         return cell_score + empty * 32 + adjacent * 31 + max(snakes) * 5 + monotonic * 1
-
 
     def get_adjacents(self, matrix, pos: tuple):
         pass

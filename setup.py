@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='2048',
@@ -8,5 +8,12 @@ setup(
     author='Trevor Xander',
     author_email='trevorcolexander@gmail.com',
     description='',
-    install_requires = ['PyQt5', 'anytree']
+    install_requires = ['PyQt5', 'anytree','setuptools'],
+    py_modules=['2048'],
+    packages=find_packages(),
+    entry_points={
+        'console_scripts': [
+            '2048 = 2048:run_game'
+        ]
+    }
 )

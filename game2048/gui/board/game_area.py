@@ -1,7 +1,8 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
 from game2048.gui.elements import Label
-from game2048 import gui
-import game2048
+from game2048 import Model2048
+from game2048.gui.board.game_grid import GameGrid
+
+from PyQt5 import QtCore, QtGui, QtWidgets
 import queue
 
 
@@ -11,18 +12,19 @@ class GameArea(QtWidgets.QWidget):
     _MAIN_LABEL_COLOR = 'rgb(118,110,102)'
     _MAIN_LABEL_FONT_SIZE = 55
     _MAIN_LABEL_STYLE = 'QLabel {{color: {color};' \
-                       'font-size: {font_size}px; ' \
-                       'font-weight: bold; }}'
+                        'font-size: {font_size}px; ' \
+                        'font-weight: bold; }}'
     _DEFAULT_STYLE = 'game_area {{ background-color: {color};' \
-                    'border: 1px solid {color};' \
-                    'border-radius: 10px;}}'
+                     'border: 1px solid {color};' \
+                     'border-radius: 10px;}}'
 
     # zero for infinite buffer size
-    _INPUT_BUFFER_SIZE = 0
+    _INPUT_BUFFER_SIZE = 5
 
     score_changed_signal = QtCore.pyqtSignal(tuple)
+    movement_complete = QtCore.pyqtSignal()
 
-    def __init__(self, parent=None, label='2048', game_size=4, has_undo=True):
+    def __init__(self, parent=None, label='2048', game_size=4, has_undo=False, has_new_game=True):
         QtWidgets.QWidget.__init__(self, parent=parent)
 
         self._parent = parent
@@ -37,8 +39,9 @@ class GameArea(QtWidgets.QWidget):
         self._ui.setupUi(self)
 
         self._main_label = self._ui.label
-        self._main_label.setStyleSheet(self._MAIN_LABEL_STYLE.format(color=self._MAIN_LABEL_COLOR,
-                                                                     font_size=main_label_font_size))
+        self._main_label.setStyleSheet(self._MAIN_LABEL_STYLE.
+                                       format(color=self._MAIN_LABEL_COLOR,
+                                              font_size=main_label_font_size))
         self._main_label.setText(label)
 
         self._score_label = self._ui.score
@@ -55,37 +58,44 @@ class GameArea(QtWidgets.QWidget):
 
         if not has_undo:
             self._ui.undo.hide()
+        if not has_new_game:
+            self._ui.new_game.hide()
 
         self._ui.undo.setMaximumWidth(self._ui.undo.width())
 
-        self.game_model = game2048.Model2048(matrix_size=game_size)
-        self._game_grid = gui.GameGrid(matrix=self.game_model.get_matrix())
+        self._game_model = Model2048(matrix_size=game_size)
+        self._game_grid = GameGrid(matrix=self._game_model.get_matrix())
 
         game_box = self._ui.game_grid_box
         game_box.addWidget(self._game_grid)
 
         self._event_queue = queue.Queue(maxsize=self._INPUT_BUFFER_SIZE)
-        self.keyboard_to_game_event = {QtCore.Qt.Key_Left: self.game_model.left,
-                                       QtCore.Qt.Key_Right: self.game_model.right,
-                                       QtCore.Qt.Key_Up: self.game_model.up,
-                                       QtCore.Qt.Key_Down: self.game_model.down,
-                                       QtCore.Qt.Key_A: self.game_model.left,
-                                       QtCore.Qt.Key_D: self.game_model.right,
-                                       QtCore.Qt.Key_W: self.game_model.up,
-                                       QtCore.Qt.Key_S: self.game_model.down,
-                                       QtCore.Qt.Key_R: self.game_model.restart_game,
-                                       QtCore.Qt.Key_U: self.game_model.undo}
+        self.keyboard_to_game_event = {QtCore.Qt.Key_Left: self._game_model.left,
+                                       QtCore.Qt.Key_Right: self._game_model.right,
+                                       QtCore.Qt.Key_Up: self._game_model.up,
+                                       QtCore.Qt.Key_Down: self._game_model.down,
+                                       QtCore.Qt.Key_A: self._game_model.left,
+                                       QtCore.Qt.Key_D: self._game_model.right,
+                                       QtCore.Qt.Key_W: self._game_model.up,
+                                       QtCore.Qt.Key_S: self._game_model.down,
+                                       QtCore.Qt.Key_R: self._game_model.restart_game,
+                                       QtCore.Qt.Key_U: self._game_model.undo}
 
         self.setMaximumWidth(self._game_grid.maximumWidth())
+
+        screen = QtGui.QGuiApplication.primaryScreen()
+        screen_height = screen.availableGeometry().height()
+
+        self.setMaximumHeight(screen_height)
 
         self.score_changed_signal.connect(parent._update_score)
 
         self._game_grid._animations.finished.connect(self._update_screen)
-        self._ui.new_game.pressed.connect(self._new_game)
+        self._ui.new_game.pressed.connect(self.new_game)
         self._ui.undo.pressed.connect(self._undo)
 
         self.show()
-        self._new_game()
+        self._start_game()
 
     def _set_score(self, score):
         if score == self._score:
@@ -95,26 +105,29 @@ class GameArea(QtWidgets.QWidget):
         if score > self._best_score:
             self._best_score = score
             self._best_score_label.set_value(score)
-        self.score_changed_signal.emit((self,score))
+        self.score_changed_signal.emit((self, score))
 
-
-    def _new_game(self):
+    def _start_game(self):
         self._event_queue.put(self.keyboard_to_game_event[QtCore.Qt.Key_R])
         self._set_score(0)
         self._update_screen()
 
+    def new_game(self):
+        self._start_game()
+        self._parent._new_game_event()
+
     def _undo(self):
-        self.game_model.undo()
+        self._game_model.undo()
         self._update_screen()
 
     def _animate_game(self):
         self._game_grid._animations.clear()
-        moved_tiles = self.game_model.get_moved_tiles()
+        moved_tiles = self._game_model.get_moved_tiles()
         for movement in moved_tiles:
             old_loc = movement[0]
             new_loc = movement[1]
             self._game_grid.animate_tile(old_loc, new_loc)
-        random_inserts = self.game_model.get_pop_ins()
+        random_inserts = self._game_model.get_pop_ins()
         for randoms in random_inserts:
             self._game_grid.animate_random(randoms[0], randoms[1])
 
@@ -122,8 +135,9 @@ class GameArea(QtWidgets.QWidget):
         self._game_grid._animations.start()
 
     def keyPressEvent(self, event):
-        self._event_queue.put(self.keyboard_to_game_event[event.key()])
-        self._process_queued_events()
+        if event.key() in self.keyboard_to_game_event.keys():
+            self._event_queue.put(self.keyboard_to_game_event[event.key()])
+            self._process_queued_events()
 
     def eventFilter(self, QObject, QEvent):
         if (QEvent.type() == QtCore.QEvent.KeyPress):
@@ -140,15 +154,18 @@ class GameArea(QtWidgets.QWidget):
             self.removeEventFilter(self)
             self._game_grid._animation_duration = self._game_grid._DEFAULT_ANIMATION_DURATION
         else:
-            self._event_queue.get()()
+            movement = self._event_queue.get()
+            movement()
             self._animate_game()
 
     def _update_screen(self):
         self._game_grid.clean_up()
-        self._game_grid._update_grid(self.game_model.get_matrix())
-        self._set_score(self.game_model.score)
+        self._game_grid._update_grid(self._game_model.get_matrix())
+        self._set_score(self._game_model.score)
 
         self._process_queued_events()
+        self.movement_complete.emit()
+
 
 class GameAreaUI(object):
     def setupUi(self, game_area):
@@ -191,11 +208,17 @@ class GameAreaUI(object):
         self.new_game = QtWidgets.QPushButton(game_area)
         self.new_game.setObjectName("new_game")
         self.new_game.setMinimumSize(QtCore.QSize(0, 50))
+        sp = self.new_game.sizePolicy()
+        sp.setRetainSizeWhenHidden(True)
+        self.new_game.setSizePolicy(sp)
 
         self.button_layout.addWidget(self.new_game)
         self.undo = QtWidgets.QPushButton(game_area)
         self.undo.setObjectName("undo")
         self.undo.setMinimumSize(QtCore.QSize(0, 50))
+        sp = self.undo.sizePolicy()
+        sp.setRetainSizeWhenHidden(True)
+        self.new_game.setSizePolicy(sp)
 
         self.button_layout.addWidget(self.undo)
         self.button_layout.setStretch(0, 2)
@@ -212,4 +235,5 @@ class GameAreaUI(object):
         self.game_board.addLayout(self.game_grid_box)
         self.game_board.setStretch(0, 1)
         self.game_board.setStretch(1, 4)
+
         self.gridLayout.addLayout(self.game_board, 0, 0, 1, 1)

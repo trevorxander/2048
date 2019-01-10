@@ -1,14 +1,16 @@
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from game2048 import gui
+from game2048.gui.elements import Tile
 
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class GameGrid(QtWidgets.QWidget):
     _MARGIN_SIZE = 12
     _DEFAULT_ANIMATION_DURATION = 100
     _DEFAULT_STYLE = 'QFrame {{background-color: {color};' \
-                    'border: 1px solid {color};' \
-                    'border-radius: 10px;}}'
+                     'border: 1px solid {color};' \
+                     'border-radius: 10px;}}'
     _GRID_COLOR = 'rgb(185,173,162)'
+
+    _GRID_MINIMUM_SIZE_FACTOR = 100
 
     def __init__(self, parent=None, matrix=None):
         QtWidgets.QWidget.__init__(self, parent=parent)
@@ -32,8 +34,9 @@ class GameGrid(QtWidgets.QWidget):
 
         self.setStyleSheet(self._DEFAULT_STYLE.format(color=self._GRID_COLOR))
 
-        self.setMinimumWidth(103.75 * self._grid_size + self._MARGIN_SIZE * 2)
-        self.setMinimumHeight(104.75 * self._grid_size + self._MARGIN_SIZE * 2)
+
+        self.setMinimumWidth(self._GRID_MINIMUM_SIZE_FACTOR * self._grid_size + self._MARGIN_SIZE * 2)
+        self.setMinimumHeight(self._GRID_MINIMUM_SIZE_FACTOR * self._grid_size + self._MARGIN_SIZE * 2)
 
         self.setMaximumWidth(150.75 * 1.5 * self._grid_size + self._MARGIN_SIZE * 2)
         self.setMaximumHeight(100.75 * 1.5 * self._grid_size + self._MARGIN_SIZE * 2)
@@ -46,7 +49,7 @@ class GameGrid(QtWidgets.QWidget):
         for row in range(self._grid_size):
             tile_row = []
             for col in range(self._grid_size):
-                new_tile = gui.Tile(parent=self._grid, value=self._game_matrix[row][col], pos=(row, col))
+                new_tile = Tile(parent=self._grid, value=self._game_matrix[row][col], pos=(row, col))
                 new_tile.length = self._tile_length
                 tile_row.append(new_tile)
             self._gui_matrix.append(tile_row)
@@ -63,7 +66,7 @@ class GameGrid(QtWidgets.QWidget):
     def animate_tile(self, tile_current_pos, tile_final_pos):
         source_tile = self._gui_matrix[tile_current_pos[0]][tile_current_pos[1]]
         destination_tile = self._gui_matrix[tile_final_pos[0]][tile_final_pos[1]]
-        moving_tile = gui.Tile(parent=self._grid, pos=tile_current_pos, value=source_tile.value)
+        moving_tile = Tile(parent=self._grid, pos=tile_current_pos, value=source_tile.value)
         moving_tile.length = self._tile_length
 
         init_loc = source_tile.geometry()
@@ -92,7 +95,7 @@ class GameGrid(QtWidgets.QWidget):
 
     def animate_random(self, pos, value):
         empty_tile = self._gui_matrix[pos[0]][pos[1]]
-        tile_to_animate = gui.Tile(parent=self._grid, pos=empty_tile._pos, value=value)
+        tile_to_animate = Tile(parent=self._grid, pos=empty_tile._pos, value=value)
         tile_to_animate.setMinimumHeight(0)
         tile_to_animate.setMinimumWidth(0)
         tile_to_animate.length = self._tile_length
@@ -115,7 +118,7 @@ class GameGrid(QtWidgets.QWidget):
         self._tile_to_delete.append(tile_to_animate)
 
     def animate_tile_wobble(self, tile):
-        tile_to_animate = gui.Tile(parent=self._grid, pos=tile._pos, value=tile.value)
+        tile_to_animate = Tile(parent=self._grid, pos=tile._pos, value=tile.value)
         tile_to_animate.length = self._tile_length
         tile_to_animate.raise_()
 

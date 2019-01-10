@@ -116,7 +116,7 @@ class TileUI(object):
     def setupUi(self, Tile):
         Tile.setObjectName("Tile")
         Tile.resize(140, 140)
-        Tile.setMinimumSize(QtCore.QSize(100, 100))
+        Tile.setMinimumSize(QtCore.QSize(70, 70))
         font = QtGui.QFont()
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
         Tile.setFont(font)

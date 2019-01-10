@@ -130,19 +130,19 @@ class TitleScreen(QtWidgets.QWidget):
         self._actiate_button(self._ui.easy)
         self._deactivate_button(self._ui.medium)
         self._deactivate_button(self._ui.hard)
-        self._game_args['comp_difficulty'] = 0
+        self._game_args['comp_difficulty'] = 1
 
     def _medium_pressed(self):
         self._deactivate_button(self._ui.easy)
         self._actiate_button(self._ui.medium)
         self._deactivate_button(self._ui.hard)
-        self._game_args['comp_difficulty'] = 1
+        self._game_args['comp_difficulty'] = 2
 
     def _hard_pressed(self):
         self._deactivate_button(self._ui.easy)
         self._deactivate_button(self._ui.medium)
         self._actiate_button(self._ui.hard)
-        self._game_args['comp_difficulty'] = 2
+        self._game_args['comp_difficulty'] = 3
 
     def _grid_options_pressed(self):
         self._show_items(self._ui.grid_options)

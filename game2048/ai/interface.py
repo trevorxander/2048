@@ -1,19 +1,17 @@
 from game2048.ai.ai import AI
-from game2048.gui.game.game_area import GameArea
 from PyQt5 import QtCore, QtWidgets, QtGui
-from threading import Thread
-import time
 
 
-class Interface(QtCore.QObject):
+class InterfaceGUI(QtCore.QObject):
     movement_signal = QtCore.pyqtSignal(QtGui.QKeyEvent)
+
     def __init__(self, play_screen, difficulty):
         QtCore.QObject.__init__(self)
 
-        self._ai_delay = (1.001 - (difficulty / 3 )) * 1000
+        self._ai_delay = (1.001 - (difficulty / 3)) * 1000
         self.play_screen = play_screen
         self.movement_signal.connect(self.play_screen.process_ai_movement)
-        self.direction_event_map =  {'left': QtCore.Qt.Key_Left,
+        self.direction_event_map = {'left': QtCore.Qt.Key_Left,
                                     'right': QtCore.Qt.Key_Right,
                                     'up': QtCore.Qt.Key_Up,
                                     'down': QtCore.Qt.Key_Down}
@@ -25,17 +23,16 @@ class Interface(QtCore.QObject):
 
     def send_event(self, direction):
         self.event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress,
-                                self.direction_event_map[direction],
-                                QtCore.Qt.NoModifier)
+                                     self.direction_event_map[direction],
+                                     QtCore.Qt.NoModifier)
         self.movement_signal.emit(self.event)
         self.event_processing = True
-
 
     def get_result(self):
         if self.event_processing:
             self.wait_for_movement()
         self.event_processing = False
-        return self.play_screen.get_ai_game().game_model
+        return self.play_screen.get_ai_game()._game_model
 
     def wait_for_movement(self):
         self.wait = QtCore.QEventLoop()
@@ -59,8 +56,3 @@ class Interface(QtCore.QObject):
         self.event_processing = False
         if self.wait.isRunning():
             self.wait.quit()
-
-
-
-
-
