@@ -145,6 +145,7 @@ class TitleScreen(QtWidgets.QWidget):
         self._game_args['comp_difficulty'] = 3
 
     def _grid_options_pressed(self):
+        self._actiate_button(self._ui.grid_options_button)
         self._show_items(self._ui.grid_options)
         self._four_pressed()
 
@@ -223,6 +224,7 @@ class TitleScreenUI(object):
         self.single_player.setText('Single Player')
         self.single_player.setObjectName("single_player")
         self.single_player.setMinimumSize(self.BUTTON_MIN_SIZE)
+        self.single_player.setCursor(QtCore.Qt.OpenHandCursor)
         self.game_options.addWidget(self.single_player)
 
         self.single_player_options = QtWidgets.QHBoxLayout()
@@ -233,12 +235,14 @@ class TitleScreenUI(object):
         self.solo.setObjectName("solo")
         self.solo.setText('Solo')
         self.solo.setMinimumSize(self.OPTION_BUTTON_MIN_SIZE)
+        self.solo.setCursor(QtCore.Qt.OpenHandCursor)
         self.single_player_options.addWidget(self.solo)
 
         self.computer = QtWidgets.QPushButton(titlescreen)
         self.computer.setObjectName("computer")
         self.computer.setText('vs. AI')
         self.computer.setMinimumSize(self.OPTION_BUTTON_MIN_SIZE)
+        self.computer.setCursor(QtCore.Qt.OpenHandCursor)
         self.single_player_options.addWidget(self.computer)
         self.game_options.addLayout(self.single_player_options)
 
@@ -248,6 +252,7 @@ class TitleScreenUI(object):
         self.easy = QtWidgets.QPushButton(titlescreen)
         self.easy.setText('Easy')
         self.easy.setObjectName("easy")
+        self.easy.setCursor(QtCore.Qt.OpenHandCursor)
         self.easy.setMinimumSize(self.DIFFICULTY_BUTTON_MIN_SIZE)
         self.computer_options.addWidget(self.easy)
 
@@ -255,12 +260,14 @@ class TitleScreenUI(object):
         self.medium.setText('Medium')
         self.medium.setObjectName("medium")
         self.medium.setMinimumSize(self.DIFFICULTY_BUTTON_MIN_SIZE)
+        self.medium.setCursor(QtCore.Qt.OpenHandCursor)
         self.computer_options.addWidget(self.medium)
 
         self.hard = QtWidgets.QPushButton(titlescreen)
         self.hard.setText('Hard')
         self.hard.setObjectName("hard")
         self.hard.setMinimumSize(self.DIFFICULTY_BUTTON_MIN_SIZE)
+        self.hard.setCursor(QtCore.Qt.OpenHandCursor)
         self.computer_options.addWidget(self.hard)
 
         self.game_options.addLayout(self.computer_options)
@@ -268,6 +275,7 @@ class TitleScreenUI(object):
         self.game_options.addSpacing(20)
 
         self.two_player = QtWidgets.QPushButton()
+        self.two_player.setCursor(QtCore.Qt.OpenHandCursor)
         self.two_player.setText('Two Players')
 
         self.two_player.setObjectName("two_player")
@@ -312,6 +320,7 @@ class TitleScreenUI(object):
 
 
         self.grid_options_button = QtWidgets.QPushButton(titlescreen)
+        self.grid_options_button.setCursor(QtCore.Qt.OpenHandCursor)
         self.grid_options_button.setText('Grid Options')
         self.grid_options_button.setObjectName("Grid Options Button")
         self.grid_options_button.setMinimumSize(self.BUTTON_MIN_SIZE)
@@ -321,18 +330,21 @@ class TitleScreenUI(object):
         self.grid_options.setObjectName("grid_options")
 
         self.four = QtWidgets.QPushButton()
+        self.four.setCursor(QtCore.Qt.OpenHandCursor)
         self.four.setText('4X4')
         self.four.setObjectName("four")
         self.four.setMinimumSize(self.DIFFICULTY_BUTTON_MIN_SIZE)
         self.grid_options.addWidget(self.four)
 
         self.five = QtWidgets.QPushButton()
+        self.five.setCursor(QtCore.Qt.OpenHandCursor)
         self.five.setText('5X5')
         self.five.setObjectName("five")
         self.five.setMinimumSize(self.DIFFICULTY_BUTTON_MIN_SIZE)
         self.grid_options.addWidget(self.five)
 
         self.six = QtWidgets.QPushButton()
+        self.six.setCursor(QtCore.Qt.OpenHandCursor)
         self.six.setText('6X6')
         self.six.setObjectName("six")
         self.six.setMinimumSize(self.DIFFICULTY_BUTTON_MIN_SIZE)
@@ -341,6 +353,7 @@ class TitleScreenUI(object):
         self.game_options.addLayout(self.grid_options)
 
         self.start_game = QtWidgets.QPushButton(titlescreen)
+        self.start_game.setCursor(QtCore.Qt.OpenHandCursor)
         self.start_game.setText('Start Game')
         self.start_game.setObjectName("Start Game")
         self.start_game.setMinimumSize(self.BUTTON_MIN_SIZE)
