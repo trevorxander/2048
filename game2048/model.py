@@ -1,6 +1,5 @@
-from random import randint
 import copy
-import time
+from random import randint
 
 
 class Model2048:
@@ -23,7 +22,6 @@ class Model2048:
                                {'right': 1},
                                {'up': 1},
                                {'down': 1}]
-
 
         self._last_game_state = None
 
@@ -101,6 +99,7 @@ class Model2048:
     def _move_tile(self, tile: tuple, left=0, up=0, matrix=None):
         if matrix == None:
             matrix = self._game_matrix
+
         def _set_new_tile(row, col, value):
             if (row, col) in self._empty_spots:
                 self._empty_spots.remove((row, col))
@@ -108,7 +107,7 @@ class Model2048:
             if value == 0:
                 self._empty_spots.add((row, col))
             else:
-                if tile != (row,col):
+                if tile != (row, col):
                     self.moved_tiles.append((tile, (row, col), value))
 
         new_tile_row = tile[0]
@@ -132,8 +131,8 @@ class Model2048:
             elif tile_value == matrix[new_tile_row][new_tile_col]:
                 # If tile was not already merged this turn
                 if (new_tile_row, new_tile_col) not in self._newly_merged:
-                    #matrix[new_tile_row][new_tile_col] *= 2
-                    _set_new_tile(new_tile_row,new_tile_col, matrix[new_tile_row][new_tile_col] * 2)
+                    # matrix[new_tile_row][new_tile_col] *= 2
+                    _set_new_tile(new_tile_row, new_tile_col, matrix[new_tile_row][new_tile_col] * 2)
                     self._score[0] += matrix[new_tile_row][new_tile_col]
                     self._newly_merged.add((new_tile_row, new_tile_col))
                     _set_new_tile(tile[0], tile[1], 0)
@@ -153,8 +152,7 @@ class Model2048:
         if len(self.moved_tiles) != 0:
             self._rand_pop_in()
 
-
-    def _movement(self, matrix = None, **direction_arg):
+    def _movement(self, matrix=None, **direction_arg):
         self._newly_merged.clear()
         self.moved_tiles.clear()
         self.pop_ins.clear()
@@ -166,19 +164,18 @@ class Model2048:
         else:
             self._vertical(matrix=matrix, **direction_arg)
 
-
     def is_game_over(self):
         if len(self._empty_spots) > 0:
             return False
 
         for row in range(len(self._game_matrix)):
-             for col in range(len(self._game_matrix)):
-                adjacents = [(row , col - 1),
+            for col in range(len(self._game_matrix)):
+                adjacents = [(row, col - 1),
                              (row, col + 1),
                              (row - 1, col),
                              (row + 1, col)]
                 for adjacent in adjacents:
-                    if adjacent[0] in range(len(self._game_matrix)) and\
+                    if adjacent[0] in range(len(self._game_matrix)) and \
                             adjacent[1] in range(len(self._game_matrix)):
                         if self._game_matrix[adjacent[0]][adjacent[1]] == self._game_matrix[row][col]:
                             return False
@@ -212,8 +209,8 @@ class Model2048:
 
     def _rand_pop_in(self):
         max_random_inserts = int(self._matrix_size / 2)
-        for num in range(1,max_random_inserts + 1):
-            if randint(1,100) <= self._no_random_inserts_percent:
+        for num in range(1, max_random_inserts + 1):
+            if randint(1, 100) <= self._no_random_inserts_percent:
                 no_of_random_inserts = num
                 break
 
@@ -224,12 +221,12 @@ class Model2048:
             empty_spot = self._pick_rand_empty_spot()
             new_random_num = self._pick_num_to_insert()
             self._game_matrix[empty_spot[0]][empty_spot[1]] = new_random_num
-            self.pop_ins.append((empty_spot,new_random_num))
+            self.pop_ins.append((empty_spot, new_random_num))
             continue
 
     def _pick_rand_empty_spot(self):
-        no_of_picks = randint(1,len(self._empty_spots))
-        for picks in range (no_of_picks):
+        no_of_picks = randint(1, len(self._empty_spots))
+        for picks in range(no_of_picks):
             self._empty_spots.add(self._empty_spots.pop())
         return self._empty_spots.pop()
 
@@ -237,5 +234,5 @@ class Model2048:
         for num in self._random_inserts:
             if num == self._random_inserts[- 1]:
                 return num
-            if randint(1,100) <= self._random_inserts_percent:
+            if randint(1, 100) <= self._random_inserts_percent:
                 return num

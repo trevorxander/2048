@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import game2048
-
 from os import sys
 from PyQt5 import QtWidgets
+import game2048
+
 
 def run_game():
     app = QtWidgets.QApplication(sys.argv)
@@ -14,4 +14,3 @@ def run_game():
 
 if __name__ == '__main__':
     run_game()
-
