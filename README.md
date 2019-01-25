@@ -24,3 +24,7 @@ python3 2048/2048.py
 <br>
 
 Make sure python3 and setuptools are installed in your system.
+
+## License
+
+This project is licensed under the GNU Affero General Public License - see the [LICENSE.md](LICENSE.md) file for details
