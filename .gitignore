@@ -24,3 +24,5 @@ tests/copy_test\.py
 *.pyprof
 
 profile\.pyprof\.log
+
+Screenshots/
