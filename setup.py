@@ -13,7 +13,7 @@ setup(
     license='GNU Affero General Public License v3.0',
     author='Trevor Xander',
     author_email='trevorcolexander@gmail.com',
-    long_description=read('README'),
+    long_description=read('README.md'),
     install_requires=['PyQt5', 'anytree', 'setuptools'],
     py_modules=['2048'],
     packages=find_packages(),
