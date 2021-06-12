@@ -10,13 +10,13 @@ class Tile(QtWidgets.QWidget):
                    'font-weight: bold;' \
                    'border-radius: {border_radius};}}'
 
-    def __init__(self, parent=None, tile_num=0, pos=(0, 0)):
+    def __init__(self, parent=None, value=0, pos=(0, 0)):
         QtWidgets.QWidget.__init__(self, parent=parent)
 
         self._parent = parent
         self._game_size = parent.parent()._grid_size
         self._pos = pos
-        self._value = tile_num
+        self._value = value
         ui = TileUI()
         ui.setupUi(self)
 
@@ -25,7 +25,7 @@ class Tile(QtWidgets.QWidget):
         self._max_tile_value = 4096
         self._value_label.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.value = tile_num
+        self.value = value
         self._remap_to_grid()
         self.show()
 
