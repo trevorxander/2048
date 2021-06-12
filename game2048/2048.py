@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-from os import sys
+import sys
+
 from PyQt5 import QtWidgets
+
 import game2048
 
 
