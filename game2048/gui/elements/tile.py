@@ -74,7 +74,7 @@ class Tile(QtWidgets.QWidget):
             4: {'color': 'rgb(234,224,202)', 'font_color': 'rgb(115,107,100)', 'font_size': 48},
             8: {'color': 'rgb(232,179,129)', 'font_color': 'rgb(255,255,255)', 'font_size': 48},
             16: {'color': 'rgb(220,147,93)', 'font_color': 'rgb(255,255,255)', 'font_size': 48},
-            32: {'color': 'rgb(231,129,104,)', 'font_color': 'rgb(255,255,255)', 'font_size': 48},
+            32: {'color': 'rgb(231,129,104)', 'font_color': 'rgb(255,255,255)', 'font_size': 48},
             64: {'color': 'rgb(216,99,64)', 'font_color': 'rgb(255,255,255)', 'font_size': 48},
             128: {'color': 'rgb(239,217,123)', 'font_color': 'rgb(255,255,255)', 'font_size': 44},
             256: {'color': 'rgb(236,209,99)', 'font_color': 'rgb(255,255,255)', 'font_size': 43},
